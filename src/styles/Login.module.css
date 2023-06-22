@@ -1,9 +1,18 @@
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #660099;
+}
+
 .main {
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
-  align-items: flex-start;
+  justify-content: center;
+  align-items: center;
   padding: 3rem;
   padding-top: 6rem;
   min-height: 100vh;
+  width: 50%;  
+  background-color: white;
 }

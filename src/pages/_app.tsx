@@ -1,10 +1,11 @@
 import '@/styles/globals.css'
 import type { AppProps } from 'next/app'
-import { ThemeContextProvider, getTelefonicaSkin } from '@telefonica/mistica'
+import { ThemeContextProvider, getVivoNewSkin } from '@telefonica/mistica'
 import "@telefonica/mistica/css/mistica.css";
 
 const misticaTheme: any = {
-  skin: getTelefonicaSkin(),
+  colorScheme: 'light',
+  skin: getVivoNewSkin(),
   i18n: {locale: 'es-ES', phoneNumberFormattingRegionCode: 'ES'},
 };
 

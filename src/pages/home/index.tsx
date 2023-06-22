@@ -4,13 +4,15 @@ import {
   ButtonDanger,
   ButtonPrimary,
   ButtonSecondary,
-  IconAppsFilled,
+  IconLayersFilled,
+  IconAddMoreFilled,
   IconCoinsRegular,
-  IconLogoutRegular,
-  IconSettingsRegular,
+  IconLogoutFilled,
+  IconSettingsFilled,
   IconShoppingCartRegular,
   IconStatusChartRegular,
   IconUserAccountRegular,
+  IconAppsBusinessRegular,
   Inline,
   ResponsiveLayout,
   Stack,
@@ -33,7 +35,8 @@ export default function Home() {
   const [userName, setUserName] = React.useState("");
   const [allCartProducts, setAllCartProducts] = React.useState<CartProductType[]>([]);
   const [availableProducts, setAvailableProducts] = React.useState<ProductType[]>([]);
-  const [stateChange, setStateChange] = React.useState(false);
+  const [stateChange, setStateChange] = React.useState(false); 
+  const [noData, setNoData] = React.useState(false); 
   const router = useRouter();
 
   React.useEffect(() => {
@@ -52,6 +55,7 @@ export default function Home() {
         await api.get(`/get/cart_products`).then(res => setAllCartProducts(res.data));
         await api.get(`/get/products`).then(res => setAvailableProducts(res.data));
       } catch (err) {
+        setNoData(true);
         console.log(err);
       }
     }
@@ -130,28 +134,30 @@ export default function Home() {
     <ResponsiveLayout className={styles.main}>
       <Stack space={0}>
         <Inline space={16} alignItems="center">
-          <IconAppsFilled size={40} />
-          <Text8> Minhas Compras</Text8>
+          <IconLayersFilled size={40} />
+          <Text8>Meus pedidos</Text8>
         </Inline>
         <Box paddingBottom={48} paddingTop={12}>
           <Inline space="between">
             <Inline space={16}>
               <ButtonPrimary onPress={() => { router.push("new-cart") }}>
-                <Text2 regular>+ Novo Carrinho</Text2>
+                <IconAddMoreFilled color="white"/>
+                <Text2 regular color="white"> Novo pedido</Text2>              
               </ButtonPrimary>
               <ButtonPrimary onPress={() => { router.push("list-products") }}>
-                <Text2 regular>Catálogo de Produtos</Text2>
+                <IconAppsBusinessRegular color="white" />
+                <Text2 regular color="white">Produtos</Text2>
               </ButtonPrimary>
             </Inline>
             <Inline space={16}>
-              <ButtonSecondary onPress={() => { 
+              <ButtonPrimary onPress={() => { 
                 window.sessionStorage.clear();
                 router.replace("/");
               }}>
-                <IconLogoutRegular />
-                <Text2 regular>Logout</Text2>
-              </ButtonSecondary>
-              <ButtonSecondary onPress={() => { 
+                <IconLogoutFilled color="white"/>
+                <Text2 regular color="white">Logout</Text2>
+              </ButtonPrimary>
+              <ButtonPrimary onPress={() => { 
                 router.push({
                   pathname: "/edit-profile",
                   query: {
@@ -159,9 +165,9 @@ export default function Home() {
                   }
                 }) 
               }}>
-                <IconSettingsRegular />
-                <Text2 regular>Editar Perfil</Text2>
-              </ButtonSecondary>
+                <IconSettingsFilled color="white" />
+                <Text2 regular color="white">Editar Perfil</Text2>
+              </ButtonPrimary>
             </Inline>
           </Inline>
         </Box>
@@ -308,7 +314,7 @@ export default function Home() {
             ))
             :
             <Box>
-              <Text6>Carregando...</Text6>
+              <Text6>{noData ? 'Nenhum dado encontrado!' : 'Carregando...'}</Text6>
             </Box>
           }
         </Box>

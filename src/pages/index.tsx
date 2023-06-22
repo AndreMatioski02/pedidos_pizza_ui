@@ -10,13 +10,13 @@ export default function Login() {
   const router = useRouter();
 
   const handleUserLogin = async () => {
-    try{
+    try {
       await api.post("/login", {
         email,
         password
       }).then(res => window.sessionStorage.setItem("userId", res.data[0].id));
       router.push("/home");
-    } catch(err) {
+    } catch (err) {
       console.log(err);
       alert({
         title: "Usuário ou senha inválidos!",
@@ -27,43 +27,48 @@ export default function Login() {
   }
 
   return (
-    <ResponsiveLayout className={styles.main}>
-      <Box paddingX={16}>
-        <Stack space={8}>
-          <Text8>Olá, seja bem vindo!</Text8>
-          <Text4 medium>
-            Efetue seu login abaixo
-          </Text4>
-        </Stack>
-        <Box paddingTop={80}>
-          <EmailField
-            label='E-mail'
-            name='email-input'
-            value={email}
-            onChangeValue={setEmail}
-          />
-        </Box>
-        <Box paddingTop={24}>
-          <PasswordField 
-            label='Senha'
-            name='password-input'
-            value={password}
-            onChangeValue={setPassword}
-          />
-        </Box>
-        <Box paddingTop={56}>
-          <ButtonLayout>
-            <ButtonPrimary onPress={() => {handleUserLogin()}}>
-              Login
-            </ButtonPrimary>
-          </ButtonLayout>
-        </Box>
-        <Box paddingTop={32}>
-          <Text2 medium>
-            Não possui uma conta? <TextLink onPress={() => {router.push("/register")}}>Cadastre-se</TextLink> agora!
-          </Text2>
+    <Box className={styles.container}>
+      <Box className={styles.main}>
+        <Box paddingX={16}>
+          <Stack space={8}>
+            <Text8>Olá, seja bem vindo!</Text8>
+            <Text4 medium>
+              Efetue seu login abaixo
+            </Text4>
+          </Stack>
+          <Box paddingTop={80}>
+            <EmailField
+              label='E-mail'
+              name='email-input'
+              value={email}
+              onChangeValue={setEmail}
+            />
+          </Box>
+          <Box paddingTop={24}>
+            <PasswordField
+              label='Senha'
+              name='password-input'
+              value={password}
+              onChangeValue={setPassword}
+            />
+          </Box>
+          <Box paddingTop={56}>
+            <ButtonLayout>
+              <ButtonPrimary onPress={() => {
+                router.push("/home");
+                // handleUserLogin();
+              }}>
+                Login
+              </ButtonPrimary>
+            </ButtonLayout>
+          </Box>
+          <Box paddingTop={32}>
+            <Text2 medium>
+              Não possui uma conta? <TextLink onPress={() => { router.push("/client-register") }}>Cadastre-se</TextLink> agora!
+            </Text2>
+          </Box>
         </Box>
       </Box>
-    </ResponsiveLayout>
+    </Box>
   )
 }

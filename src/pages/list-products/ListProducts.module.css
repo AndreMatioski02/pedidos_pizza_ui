@@ -1,0 +1,57 @@
+.main {
+  display: flex;
+  align-items: flex-start;
+  flex-direction: column;
+  justify-content: flex-start;
+  width: 100%;
+  padding: 3rem;
+}
+
+.tablesContainer {
+  height: 800px;
+  overflow-y: scroll;
+}
+
+.editBtn,
+.deleteBtn {
+  background-color: orange;
+  color: white;
+  border: none;
+  padding: 6px;
+  border-radius: 4px;
+  transition: 240ms ease-in-out;
+  cursor: pointer;
+}
+
+.crudRow {
+  width: 100%;
+  height: 5vh;
+  border-bottom: 1px solid lightgray;
+  transition: 120ms ease-in-out;
+  text-align: center;
+}
+
+.crudRow:hover {
+  background-color: #272727;
+}
+
+.crudBody {
+  width: 100%;
+  height: 100%;
+}
+
+.crudHeader {
+  width: 100%;
+  height: 64px;
+  background-color: #222222;
+  color: white;
+}
+
+.crudTable {
+  width: 100%;
+}
+
+.tableInfo {
+  width: 100%;
+  background-color: #222222;
+}
