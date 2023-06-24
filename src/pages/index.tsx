@@ -14,7 +14,11 @@ export default function Login() {
       await api.post("/login", {
         email,
         password
-      }).then(res => window.sessionStorage.setItem("userId", res.data[0].id));
+      }).then(res => {
+        window.sessionStorage.setItem("userId", res.data[0].id);
+        window.sessionStorage.setItem("clientId", res.data[0].client_id);
+
+      });
       router.push("/home");
     } catch (err) {
       console.log(err);
@@ -55,8 +59,7 @@ export default function Login() {
           <Box paddingTop={56}>
             <ButtonLayout>
               <ButtonPrimary onPress={() => {
-                router.push("/home");
-                // handleUserLogin();
+                handleUserLogin();
               }}>
                 Login
               </ButtonPrimary>
