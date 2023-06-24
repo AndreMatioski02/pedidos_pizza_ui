@@ -32,7 +32,8 @@
 }
 
 .crudRow:hover {
-  background-color: #272727;
+  background-color: rgba(102, 0, 153, 0.1);
+  cursor: pointer;
 }
 
 .crudBody {
@@ -43,7 +44,7 @@
 .crudHeader {
   width: 100%;
   height: 64px;
-  background-color: #222222;
+  background-color: #660099;
   color: white;
 }
 
@@ -53,5 +54,5 @@
 
 .tableInfo {
   width: 100%;
-  background-color: #222222;
+  background-color: #660099;
 }

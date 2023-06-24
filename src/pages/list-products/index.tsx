@@ -4,10 +4,11 @@ import {
   ButtonDanger,
   ButtonPrimary,
   ButtonSecondary,
+  IconAddMoreFilled,
   IconAppsFilled,
   IconChevronLeftRegular,
-  IconLogoutRegular,
-  IconSettingsRegular,
+  IconLogoutFilled,
+  IconSettingsFilled,
   Inline,
   ResponsiveLayout,
   Stack,
@@ -37,26 +38,6 @@ export default function ListProducts() {
     }
   }
 
-  const handleFormatDate = (date: string) => {
-    const completeDate = new Date(date);
-    let formattedMonth;
-    let formattedDay;
-
-    if(completeDate.getDate() > 9) {
-      formattedDay = completeDate.getDate();
-    }else {
-      formattedDay = `0${completeDate.getDate()}`;
-    }
-
-    if(completeDate.getMonth() > 9) {
-      formattedMonth = completeDate.getMonth();
-    }else {
-      formattedMonth = `0${completeDate.getMonth()}`;
-    }
-
-    return `${formattedDay}/${formattedMonth}/${completeDate.getFullYear()}`;
-  }
-
   const handleDeleteProduct = async (productId: string) => {
     try {
       await api.delete(`/delete/product/${productId}`);
@@ -69,24 +50,29 @@ export default function ListProducts() {
   return (
     <ResponsiveLayout className={styles.main}>
       <Stack space={0}>
-        <Text8><IconAppsFilled size={40} /> Catálogo de Produtos</Text8>
+        <Text8><IconAppsFilled size={40} /> Pizzas cadastradas</Text8>
         <Box paddingBottom={48} paddingTop={12}>
           <Inline space="between">
             <Inline space={16}>
               <ButtonPrimary onPress={() => { router.push("/home") }}>
-                <IconChevronLeftRegular />
-                <Text2 regular>Voltar</Text2>
+                <IconChevronLeftRegular color="white"/>
+                <Text2 regular color="white">Voltar</Text2>
               </ButtonPrimary>
               <ButtonPrimary onPress={() => { router.push("new-product") }}>
-                <Text2 regular>+ Novo Produto</Text2>
+                <IconAddMoreFilled color="white"/>
+                <Text2 regular color="white">Cadastrar nova pizza</Text2>             
+ 
               </ButtonPrimary>
             </Inline>
             <Inline space={16}>
-              <ButtonSecondary onPress={() => { router.replace("/") }}>
-                <IconLogoutRegular />
-                <Text2 regular>Logout</Text2>
-              </ButtonSecondary>
-              <ButtonSecondary onPress={() => { 
+              <ButtonPrimary onPress={() => { 
+                window.sessionStorage.clear();
+                router.replace("/");
+              }}>
+                <IconLogoutFilled color="white"/>
+                <Text2 regular color="white">Logout</Text2>
+              </ButtonPrimary>
+              <ButtonPrimary onPress={() => { 
                 router.push({
                   pathname: "/edit-profile",
                   query: {
@@ -94,9 +80,9 @@ export default function ListProducts() {
                   }
                 }) 
               }}>
-                <IconSettingsRegular />
-                <Text2 regular>Editar Perfil</Text2>
-              </ButtonSecondary>
+                <IconSettingsFilled color="white" />
+                <Text2 regular color="white">Editar Perfil</Text2>
+              </ButtonPrimary>
             </Inline>
           </Inline>
         </Box>
@@ -106,10 +92,8 @@ export default function ListProducts() {
               <tr>
                 <th style={{ paddingLeft: "8px" }}><Text2 medium color="white">ID</Text2></th>
                 <th><Text2 medium color="white">Nome</Text2></th>
-                <th><Text2 medium color="white">Marca</Text2></th>
                 <th><Text2 medium color="white">Preço</Text2></th>
                 <th style={{ width: "250px" }}><Text2 medium color="white">Descrição</Text2></th>
-                <th><Text2 medium color="white">Validade</Text2></th>
                 <th><Text2 medium color="white"></Text2></th>
                 <th><Text2 medium color="white"></Text2></th>
               </tr>
@@ -121,12 +105,10 @@ export default function ListProducts() {
                   <tr className={styles.crudRow} key={index}>
                     <td style={{ paddingLeft: "8px" }}><Text1 medium>{product.id}</Text1></td>
                     <td><Text1 medium wordBreak>{product.name}</Text1></td>
-                    <td><Text1 medium wordBreak>{product.brand}</Text1></td>
                     <td><Text1 medium>R${product.price.toFixed(2).toString().replace(".", ",")}</Text1></td>
                     <td><Text1 medium truncate>{product.description}</Text1></td>
-                    <td><Text1 medium>{handleFormatDate(product.expiration_date)}</Text1></td>
                     <td>
-                      <ButtonSecondary
+                      <ButtonPrimary
                         onPress={() => { 
                           router.push({
                             pathname: "/edit-product",
@@ -138,7 +120,7 @@ export default function ListProducts() {
                         small
                       >
                         Editar
-                      </ButtonSecondary>
+                      </ButtonPrimary>
                     </td>
                     <td>
                       <ButtonDanger

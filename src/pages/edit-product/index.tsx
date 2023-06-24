@@ -20,20 +20,16 @@ import { api } from "@/services/base";
 
 export default function EditProduct() {
   const [name, setName] = React.useState("");
-  const [brand, setBrand] = React.useState("");
   const [description, setDescription] = React.useState("");
   const [price, setPrice] = React.useState("");
-  const [expirationDate, setExpirationDate] = React.useState("");
   const router = useRouter();
   const toEditProductId = router.query.productId;
 
   const validateFields = () => {
     if(
       name.length < 2 ||
-      brand.length < 2 ||
       description.length < 10 ||
-      Number(price.replace(",", ".")) <= 0.01 ||
-      expirationDate.length < 10
+      Number(price.replace(",", ".")) <= 0.01
     ){
       return true;
     }else {
@@ -45,10 +41,8 @@ export default function EditProduct() {
     try {
       await api.put(`/update/product/${toEditProductId}`, {
         name,
-        brand,
+        description,
         price: Number(price.replace(",", ".")),
-        expiration_date: expirationDate,
-        description
       });
       alert({
         title: "Produto atualizado com sucesso!",
@@ -67,34 +61,12 @@ export default function EditProduct() {
     }
   }
 
-  const handleFormatDate = (date: string) => {
-    const completeDate = new Date(date);
-    let formattedMonth;
-    let formattedDay;
-
-    if(completeDate.getDate() > 9) {
-      formattedDay = completeDate.getDate();
-    }else {
-      formattedDay = `0${completeDate.getDate()}`;
-    }
-
-    if(completeDate.getMonth() > 9) {
-      formattedMonth = completeDate.getMonth();
-    }else {
-      formattedMonth = `0${completeDate.getMonth()}`;
-    }
-
-    return `${completeDate.getFullYear()}-${formattedMonth}-${formattedDay}`;
-  }
-
   const handleGetProductInfo = async () => {
     try {
       await api.get(`/get/product/${toEditProductId}`).then(res => {
         setName(res.data[0].name);
-        setBrand(res.data[0].brand);
         setDescription(res.data[0].description);
         setPrice(res.data[0].price.toString());
-        setExpirationDate(handleFormatDate(res.data[0].expiration_date));
       })
     } catch(err) {
       console.log(err);
@@ -133,15 +105,6 @@ export default function EditProduct() {
           </Box>
           <Box paddingTop={16}>
             <TextField 
-              label="Marca"
-              name="product-brand"
-              value={brand}
-              onChangeValue={setBrand}
-              helperText="Pelo menos 2 caracteres"
-            />
-          </Box>
-          <Box paddingTop={16}>
-            <TextField 
               label="Descrição"
               name="product-description"
               value={description}
@@ -157,16 +120,6 @@ export default function EditProduct() {
               value={price}
               onChangeValue={setPrice}
               helperText="Pelo menos 0,01"
-            />
-          </Box>
-          <Box paddingTop={16}>
-            <DateField
-              label="Data de validade"
-              name="product-expiration-date"
-              value={expirationDate}
-              onChangeValue={setExpirationDate}
-              min={new Date()}
-              helperText="Insira uma data válida"
             />
           </Box>
         </Stack>
