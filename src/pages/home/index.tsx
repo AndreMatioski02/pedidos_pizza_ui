@@ -3,15 +3,10 @@ import {
   Box,
   ButtonDanger,
   ButtonPrimary,
-  ButtonSecondary,
   IconLayersFilled,
   IconAddMoreFilled,
-  IconCoinsRegular,
   IconLogoutFilled,
   IconSettingsFilled,
-  IconShoppingCartRegular,
-  IconStatusChartRegular,
-  IconUserAccountRegular,
   IconAppsBusinessRegular,
   Inline,
   ResponsiveLayout,
@@ -25,15 +20,16 @@ import {
 } from '@telefonica/mistica'
 import styles from "./Home.module.css";
 import { useRouter } from "next/router";
-import { CartType, CartProductType, ProductType } from "@/types/cart";
+import { OrderType, OrderProductType, ProductType } from "@/types/types";
 import { api } from "@/services/base";
-import { formatCartDate } from "@/utilities/formatOrderDate";
+import { formatOrderDate } from "@/utilities/formatOrderDate";
 
 export default function Home() {
-  const [myCarts, setMyCarts] = React.useState<CartType[]>([]);
+  const [myOrders, setMyOrders] = React.useState<OrderType[]>([]);
   const [userId, setUserId] = React.useState("");
+  const [clientId, setClientId] = React.useState("");
   const [userName, setUserName] = React.useState("");
-  const [allCartProducts, setAllCartProducts] = React.useState<CartProductType[]>([]);
+  const [allOrderProducts, setAllOrderProducts] = React.useState<OrderProductType[]>([]);
   const [availableProducts, setAvailableProducts] = React.useState<ProductType[]>([]);
   const [stateChange, setStateChange] = React.useState(false); 
   const [noData, setNoData] = React.useState(false); 
@@ -41,18 +37,19 @@ export default function Home() {
 
   React.useEffect(() => {
     setUserId(window.sessionStorage.getItem("userId") as string);
+    setClientId(window.sessionStorage.getItem("clientId") as string);
     handleGetUserName();
-  }, [userId]);
+  }, [userId, clientId]);
 
   React.useEffect(() => {
-    handleGetUserCarts();
+    handleGetClientOrders();
   }, [stateChange]);
 
-  const handleGetUserCarts = async () => {
-    if(userId) {
+  const handleGetClientOrders = async () => {
+    if(clientId) {
       try {
-        await api.get(`/get/shopping_cart/user/${userId}`).then(res => setMyCarts(res.data));
-        await api.get(`/get/cart_products`).then(res => setAllCartProducts(res.data));
+        await api.get(`/get/order/client/${clientId}`).then(res => setMyOrders(res.data));
+        await api.get(`/get/order_products`).then(res => setAllOrderProducts(res.data));
         await api.get(`/get/products`).then(res => setAvailableProducts(res.data));
       } catch (err) {
         setNoData(true);
@@ -73,61 +70,22 @@ export default function Home() {
     setStateChange(false);
   }
 
-  const handleRemoveProductFromCart = async (toRemoveProductId: string, cartId: string) => {
-    const myCart = await api.get(`/get/shopping_cart/${cartId}`).then(res => res.data[0]);
-    const toRemoveCartProduct = await api.get(`/get/cart_product/${cartId}/${toRemoveProductId}`).then(res => res.data[0]);;
+  const handleRemoveProductFromOrder = async (toRemoveProductId: number, orderId: number) => {
+    const myOrder = await api.get(`/get/order_product/${orderId}`).then(res => res.data[0]);
+    const toRemoveOrderProduct = await api.get(`/get/order_product/${orderId}/${toRemoveProductId}`).then(res => res.data[0]);;
     try{
-      await api.delete(`/delete/cart_product/${cartId}/${toRemoveProductId}`);
-      await api.put(`/update/shopping_cart/${cartId}`, {
-        total_value: (myCart.total_value-(toRemoveCartProduct.product_value*toRemoveCartProduct.quantity)).toFixed(2),
+      await api.delete(`/delete/order_product/${orderId}/${toRemoveProductId}`);
+      await api.put(`/update/order_product/${orderId}`, {
+        total_value: (myOrder.total_value-(toRemoveOrderProduct.product_value*toRemoveOrderProduct.quantity)).toFixed(2),
         status: "P",
-        created_at: formatCartDate(new Date(myCart.created_at)),
-        updated_at: formatCartDate(new Date()),
-        user_id: myCart.user_id
+        created_at: formatOrderDate(new Date(myOrder.created_at)),
+        updated_at: formatOrderDate(new Date()),
+        user_id: myOrder.user_id
       });
     } catch(err) {
       console.log(err);
     }
-    handleGetUserCarts();
-  }
-
-  const handleFormatDate = (date: string) => {
-    const completeDate = new Date(date);
-    let formattedMonth;
-    let formattedDay;
-
-    if(completeDate.getDate() > 9) {
-      formattedDay = completeDate.getDate();
-    }else {
-      formattedDay = `0${completeDate.getDate()}`;
-    }
-
-    if(completeDate.getMonth() > 9) {
-      formattedMonth = completeDate.getMonth();
-    }else {
-      formattedMonth = `0${completeDate.getMonth()}`;
-    }
-
-    return `${formattedDay}/${formattedMonth}/${completeDate.getFullYear()}`;
-  }
-
-  const handleUpdateCart = async (toUpdateStatus: string, cartId: string) => {
-    setStateChange(true);
-    const myCart = await api.get(`/get/shopping_cart/${cartId}`).then(res => res.data[0]);
-
-    try{
-      api.put(`/update/shopping_cart/${cartId}`, {
-        total_value: myCart.total_value,
-        status: toUpdateStatus,
-        created_at: formatCartDate(new Date(myCart.created_at)),
-        updated_at: formatCartDate(new Date()),
-        user_id: myCart.user_id
-      });
-    } catch(err) {
-      console.log(err);
-    }
-    
-    setStateChange(false);
+    handleGetClientOrders();
   }
 
   return (
@@ -140,7 +98,7 @@ export default function Home() {
         <Box paddingBottom={48} paddingTop={12}>
           <Inline space="between">
             <Inline space={16}>
-              <ButtonPrimary onPress={() => { router.push("new-cart") }}>
+              <ButtonPrimary onPress={() => { router.push("new-order") }}>
                 <IconAddMoreFilled color="white"/>
                 <Text2 regular color="white"> Novo pedido</Text2>              
               </ButtonPrimary>
@@ -161,7 +119,7 @@ export default function Home() {
                 router.push({
                   pathname: "/edit-profile",
                   query: {
-                    userId: "1"
+                    userId: userId
                   }
                 }) 
               }}>
@@ -172,114 +130,44 @@ export default function Home() {
           </Inline>
         </Box>
         <Box className={styles.tablesContainer}>
-          {myCarts && myCarts.length > 0
+          {myOrders && myOrders.length > 0
             ?
-            myCarts.map((cart: CartType, index: React.Key) => (
+            myOrders.map((order: OrderType, index: React.Key) => (
               <Box key={index} paddingBottom={64}>
                 <Box className={styles.tableInfo} padding={12} paddingTop={16}>
-                  <Inline space="between">
-                    <Inline space={12}>
-                      <Tag Icon={IconShoppingCartRegular} type={cart.status == "E" ? "inactive" : "warning"}>
-                        {`Carrinho: ${cart.id}`}
-                      </Tag>
-                      {cart.status != "E"
-                        ?
-                        <Tag Icon={IconStatusChartRegular} type={cart.status == "P" ? "promo" : "success"}>
-                          {`Status: ${cart.status === "P" ? "Pendente" : "Baixado"}`}
-                        </Tag>
-                        :
-                        <Tag Icon={IconStatusChartRegular} type="inactive">
-                          Status: Excluído
-                        </Tag>
-                      }
-                      <Tag Icon={IconCoinsRegular} type={cart.status == "E" ? "inactive" : "warning"}>
-                        {`Valor total: R$${cart.total_value.toFixed(2).toString().replace(".", ",")}`}
-                      </Tag>
-                      <Tag Icon={IconUserAccountRegular} type={cart.status == "E" ? "inactive" : "warning"}>
-                        {`Cliente: ${userName}`}
-                      </Tag>
-                    </Inline>
-                    <Inline space={16}>
-                      <ButtonSecondary
-                        disabled={cart.status !== "P"}
-                        small
-                        onPress={() => {
-                          router.push({
-                            pathname: "add-product-to-cart",
-                            query: {
-                              cartId: cart.id
-                            }
-                          })
-                        }}
-                      >
-                        Adicionar produto
-                      </ButtonSecondary>
-                      <ButtonDanger
-                        disabled={cart.status !== "P"}
-                        small
-                        onPress={() => confirm({
-                          title: "Tem certeza que deseja excluir este carrinho?",
-                          message: "Esta ação não pode ser revertida (o carrinho será marcado como Excluído)",
-                          acceptText: "Sim, desejo excluir",
-                          cancelText: "Não, voltar",
-                          onAccept: () => { handleUpdateCart("E", cart.id) }
-                        })}
-                      >
-                        Excluir carrinho
-                      </ButtonDanger>
-                      <ButtonPrimary
-                        disabled={cart.status !== "P"}
-                        small
-                        onPress={() => confirm({
-                          title: "Tem certeza que deseja finalizar este carrinho?",
-                          message: "Esta ação não pode ser revertida (o carrinho será marcado como Baixado)",
-                          acceptText: "Sim, desejo finalizar",
-                          cancelText: "Não, voltar",
-                          onAccept: () => { handleUpdateCart("B", cart.id) }
-                        })}
-                      >
-                        Finalizar carrinho
-                      </ButtonPrimary>
-                    </Inline>
-                  </Inline>
                 </Box>
                 <table cellSpacing={0} cellPadding={0} className={styles.crudTable}>
                   <thead className={styles.crudHeader}>
                     <tr>
                       <th style={{ paddingLeft: "8px" }}><Text2 medium color="white">ID</Text2></th>
                       <th><Text2 medium color="white">Nome</Text2></th>
-                      <th><Text2 medium color="white">Marca</Text2></th>
                       <th><Text2 medium color="white">Preço</Text2></th>
                       <th><Text2 medium color="white">Quantidade</Text2></th>
-                      <th><Text2 medium color="white">Validade</Text2></th>
                       <th><Text2 medium color="white">Descrição</Text2></th>
                       <th><Text2 medium color="white"></Text2></th>
                       <th><Text2 medium color="white"></Text2></th>
                     </tr>
                   </thead>
                   <tbody className={styles.crudBody}>
-                    {allCartProducts.map((cartProduct: CartProductType, index: number) => {
-                      const isProductInCart = cart.id == cartProduct.shopping_cart_id;
-                      if(isProductInCart) {
-                        const product = availableProducts.find(availableProduct => availableProduct.id == cartProduct.product_id);
+                    {allOrderProducts.map((orderProduct: OrderProductType, index: number) => {
+                      const isProductInOrder = order.id == orderProduct.order_id;
+                      if(isProductInOrder) {
+                        const product = availableProducts.find(availableProduct => availableProduct.id == orderProduct.product_id);
                         if(product) {
                           return (
                             <tr className={styles.crudRow} key={index}>
                               <td style={{ paddingLeft: "8px" }}><Text1 medium>{product.id}</Text1></td>
                               <td><Text1 medium wordBreak>{product.name}</Text1></td>
-                              <td><Text1 medium wordBreak>{product.brand}</Text1></td>
-                              <td><Text1 medium>R${cartProduct.product_value.toFixed(2).toString().replace(".", ",")}</Text1></td>
-                              <td><Text1 medium>{cartProduct.quantity}</Text1></td>
-                              <td><Text1 medium>{handleFormatDate(product.expiration_date)}</Text1></td>
+                              <td><Text1 medium>R${orderProduct.unit_price.toFixed(2).toString().replace(".", ",")}</Text1></td>
+                              <td><Text1 medium>{orderProduct.quantity}</Text1></td>
                               <td style={{ width: "200px" }}><Text1 medium truncate>{product.description}</Text1></td>
                               <td>
-                                <ButtonSecondary
-                                  disabled={cart.status !== "P"}
+                                <ButtonPrimary
                                   onPress={() => {
                                     router.push({
                                       pathname: "edit-product-price",
                                       query: {
-                                        cartId: cart.id,
+                                        orderId: order.id,
                                         productId: product.id
                                       }
                                     })
@@ -287,17 +175,16 @@ export default function Home() {
                                   small
                                 >
                                   Editar preço
-                                </ButtonSecondary>
+                                </ButtonPrimary>
                               </td>
                               <td>
                                 <ButtonDanger
-                                  disabled={cart.status !== "P"}
                                   onPress={() => confirm({
                                     title: "Tem certeza que deseja excluir este produto?",
                                     message: "Esta ação não pode ser revertida",
                                     acceptText: "Sim, excluir",
                                     cancelText: "Não, voltar",
-                                    onAccept: () => handleRemoveProductFromCart(product.id, cart.id)
+                                    onAccept: () => handleRemoveProductFromOrder(product.id, order.id)
                                   })} small
                                 >
                                   Excluir

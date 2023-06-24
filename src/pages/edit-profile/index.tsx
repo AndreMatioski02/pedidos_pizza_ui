@@ -29,8 +29,8 @@ export default function EditProfile() {
   const [usernameValid, setUsernameValid] = React.useState(true);  
   const [password, setPassword] = React.useState("");
   const [passwordValid, setPasswordValid] = React.useState(true); 
-  const [userId, setUserId] = React.useState(window.sessionStorage.getItem("userId") as string);
-  const [clientId, setClientId] = React.useState(window.sessionStorage.getItem("clientId") as string);
+  const [userId, setUserId] = React.useState("");
+  const [clientId, setClientId] = React.useState("");
   const emailRegex = /^[a-z0-9.]+@[a-z0-9]+\.[a-z]+(\.[a-z]+)?$/i
   const router = useRouter();
 
@@ -39,6 +39,11 @@ export default function EditProfile() {
   const validateEmail = (text: string) => {
     return text.match(emailRegex);
   }
+
+  React.useEffect(() => {
+    setUserId(window.sessionStorage.getItem("userId") as string);
+    setClientId(window.sessionStorage.getItem("clientId") as string);
+  }, []);
 
   React.useEffect(() => {
     if(userId){
