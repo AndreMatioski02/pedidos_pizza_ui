@@ -8,8 +8,9 @@ import { AxiosResponse } from "axios";
 export default function ClientRegister() {
   const [username, setUsername] = React.useState("");
   const [usernameValid, setUsernameValid] = React.useState(true);
-  const [senha, setSenha] = React.useState("");
-  const [senhaValid, setSenhaValid] = React.useState(true); 
+  const [password, setPassword] = React.useState("");
+  const [passwordValid, setPasswordValid] = React.useState(true); 
+  const [clientId, setClientId] = React.useState(""); 
   const router = useRouter();
 
   const lastAccessAt = new Date().toJSON().split('.')[0].replace('T', ' ');
@@ -17,20 +18,21 @@ export default function ClientRegister() {
   const handleRegisterUser = async () => {
     if (
       username.length < 6 ||
-      senha.length < 6 
+      password.length < 6 
     ) {
       setUsernameValid(false);
-      setSenhaValid(false);
+      setPasswordValid(false);
       return;
     } else {
       try {
         await api.post("/create/user", {
+          client_id: clientId,
           username,
-          senha,
-          lastAccessAt,
+          password,
+          last_access_at: lastAccessAt,
         });
         alert({
-          message: "Cadastro de usuãrio efetuado com sucesso!",
+          message: "Cadastro de usuário efetuado com sucesso!",
           acceptText: "Ok, continuar",
           onAccept() { router.push("/"); }
         });
@@ -39,6 +41,11 @@ export default function ClientRegister() {
       }
     }
   }
+
+  React.useEffect(() => {
+    setClientId(window.sessionStorage.getItem("clientId") as string);
+    console.log(clientId);
+  }, [])
 
   return (
     <Box className={styles.container}>
@@ -63,11 +70,11 @@ export default function ClientRegister() {
           <Box paddingTop={24}>
             <PasswordField
               label='Senha'
-              name='senha-input'
-              onChangeValue={setSenha}
-              value={senha}
-              error={!senhaValid}
-              helperText="Insira sua Senha"
+              name='passoword-input'
+              onChangeValue={setPassword}
+              value={password}
+              error={!passwordValid}
+              helperText="Insira sua senha"
             />
           </Box>
           <Box paddingTop={56}>
@@ -76,11 +83,6 @@ export default function ClientRegister() {
                 Cadastrar
               </ButtonPrimary>
             </ButtonLayout>
-          </Box>
-          <Box paddingTop={32}>
-            <Text2 medium>
-              Já possui uma conta? <TextLink onPress={() => { router.push("/") }}>Faça login</TextLink> agora!
-            </Text2>
           </Box>
         </Box>
       </Box>

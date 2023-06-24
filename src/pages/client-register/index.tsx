@@ -34,7 +34,6 @@ export default function ClientRegister() {
   }
 
   const handleRegisterUser = async () => {
-    console.log('oi')
     if (
       name.length < 2 ||
       CPF.length !== 11 ||
@@ -71,7 +70,8 @@ export default function ClientRegister() {
           cidade,
           UF,
           telefone,
-        });
+        }).then(res => window.sessionStorage.setItem("clientId", res.data.insertId));
+        
         alert({
           message: "Cadastro de cliente efetuado com sucesso!",
           acceptText: "Ok, continuar",
@@ -121,6 +121,7 @@ export default function ClientRegister() {
               value={CPF}
               error={!CPFValid}
               helperText="Insira seu CPF"
+              maxLength={11}
             />
           </Box>
           <Box paddingTop={24}>
