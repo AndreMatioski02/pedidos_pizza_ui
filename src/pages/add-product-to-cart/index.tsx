@@ -16,7 +16,7 @@ import styles from "./AddProductToCart.module.css";
 import { useRouter } from "next/router";
 import { api } from "@/services/base";
 import { CartProductType, ProductType } from "@/types/cart";
-import { formatCartDate } from "@/utilities/formatCartDate";
+import { formatCartDate } from "@/utilities/formatOrderDate";
 
 export default function AddProductToCart() {
   const [availableProducts, setAvailableProducts] = React.useState<ProductType[]>([]);

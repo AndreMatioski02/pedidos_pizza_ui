@@ -19,22 +19,22 @@ import {
   Text4,
   Text8,
 } from '@telefonica/mistica'
-import styles from "./NewCart.module.css";
+import styles from "./NewOrder.module.css";
 import { useRouter } from "next/router";
-import { CartProductType, ProductType } from "@/types/cart";
+import { OrderProductType, ProductType } from "@/types/types";
 import { api } from "@/services/base";
-import { formatCartDate } from "@/utilities/formatCartDate";
+import { formatOrderDate } from "@/utilities/formatOrderDate";
 
-export default function NewCart() {
+export default function NewOrder() {
   const [stepperIndex, setStepperIndex] = React.useState(0);
-  const [isCreatingNewCart, setIsCreatingNewCart] = React.useState(true);
+  const [isCreatingNewOrder, setIsCreatingNewOrder] = React.useState(true);
   const [currentSelectedProduct, setCurrentSelectedProduct] = React.useState("");
   const [availableProducts, setAvailableProducts] = React.useState<ProductType[]>([]);
-  const [newCartId, setNewCartId] = React.useState<number | undefined>(undefined);
-  const [cartProductIds, setCartProductIds] = React.useState<string[]>([]);
-  const [cartProducts, setCartProducts] = React.useState<CartProductType[]>([]);
+  const [newOrderId, setNewOrderId] = React.useState<number | undefined>(undefined);
+  const [orderProductIds, setOrderProductIds] = React.useState<string[]>([]);
+  const [orderProducts, setOrderProducts] = React.useState<OrderProductType[]>([]);
   const [productAdded, setProductAdded] = React.useState(false);
-  const [finalCartValue, setFinalCartValue] = React.useState(0);
+  const [finalOrderValue, setFinalOrderValue] = React.useState(0);
   const router = useRouter();
 
   React.useEffect(() => {
@@ -42,9 +42,9 @@ export default function NewCart() {
   }, []);
 
   React.useEffect(() => {
-    handleFetchCartProducts();
-    if(newCartId){
-      handleFetchFinalCartPrice();
+    if (newOrderId) {
+      handleFetchOrderProducts();
+      handleFetchFinalOrderPrice();
     }
   }, [productAdded]);
 
@@ -52,82 +52,75 @@ export default function NewCart() {
     await api.get("/get/products").then(res => setAvailableProducts(res.data));
   }
 
-  const handleFetchCartProducts = async () => {
-    await api.get(`/get/cart_product/${newCartId}`).then(res => setCartProducts(res.data));
+  const handleFetchOrderProducts = async () => {
+    await api.get(`/get/order_product/${newOrderId}`).then(res => setOrderProducts(res.data));
   }
 
-  const handleFetchFinalCartPrice = async () => {
-    await api.get(`/get/shopping_cart/${newCartId}`).then(res => setFinalCartValue(res.data[0].total_value));
+  const handleFetchFinalOrderPrice = async () => {
+    await api.get(`/get/order/${newOrderId}`).then(res => setFinalOrderValue(res.data[0].total_value));
   }
 
-  const handleAddProductToCart = async () => {
+  const handleAddProductToOrder = async () => {
     const productToAdd = availableProducts.find(product => product.id.toString() === currentSelectedProduct);
     setProductAdded(false);
 
     if (productToAdd) {
-      if(cartProducts.length > 0) {
-        const existingProductIndex = cartProducts.findIndex((cartProduct: CartProductType) => cartProduct.product_id.toString() === currentSelectedProduct);
+      if (orderProducts.length > 0) {
+        const existingProductIndex = orderProducts.findIndex((orderProduct: OrderProductType) => orderProduct.product_id.toString() === currentSelectedProduct);
         if (existingProductIndex == -1) {
-          try{
-            await api.post("/create/cart_product", {
-              shopping_cart_id: newCartId,
+          try {
+            await api.post("/create/order_product", {
+              order_id: newOrderId,
               product_id: Number(currentSelectedProduct),
               quantity: 1,
-              created_at: formatCartDate(new Date()), 
-              total_value: productToAdd.price.toFixed(2),
-              product_value: productToAdd.price.toFixed(2)
+              unit_price: productToAdd.price.toFixed(2)
             });
-            const myCart = await api.get(`/get/shopping_cart/${newCartId}`).then(res => res.data[0]);
-            await api.put(`/update/shopping_cart/${newCartId}`, {
-              total_value: (myCart.total_value+productToAdd.price).toFixed(2),
-              status: "P",
-              created_at: formatCartDate(new Date(myCart.created_at)),
-              updated_at: formatCartDate(new Date()),
-              user_id: myCart.user_id
+            const myOrder = await api.get(`/get/order/${newOrderId}`).then(res => res.data[0]);
+            await api.put(`/update/order/${newOrderId}`, {
+              client_id: myOrder.client_id,
+              created_at: formatOrderDate(new Date(myOrder.created_at)),
+              updated_at: formatOrderDate(new Date()),
+              total_value: (myOrder.total_value + productToAdd.price).toFixed(2),
             });
-          } catch(err) {
+          } catch (err) {
             console.log(err);
           }
         } else {
-          const toUpdateProduct = cartProducts[existingProductIndex];
-          try{
-            await api.put(`/update/cart_product/${newCartId}/${toUpdateProduct.product_id}`, {
-              quantity: (toUpdateProduct.quantity+1),
-              created_at: formatCartDate(new Date(toUpdateProduct.created_at)),
-              total_value: (toUpdateProduct.product_value*(toUpdateProduct.quantity+1)).toFixed(2),
-              product_value: toUpdateProduct.product_value.toFixed(2)
+          const toUpdateProduct = orderProducts[existingProductIndex];
+          try {
+            await api.put(`/update/order_product/${newOrderId}/${toUpdateProduct.product_id}`, {
+              order_id: newOrderId,
+              product_id: Number(currentSelectedProduct),
+              quantity: (toUpdateProduct.quantity + 1),
+              unit_price: toUpdateProduct.unit_price.toFixed(2)
             });
-            const myCart = await api.get(`/get/shopping_cart/${newCartId}`).then(res => res.data[0]);
-            await api.put(`/update/shopping_cart/${newCartId}`, {
-              total_value: (myCart.total_value+toUpdateProduct.product_value).toFixed(2),
-              status: "P",
-              created_at: formatCartDate(new Date(myCart.created_at)),
-              updated_at: formatCartDate(new Date()),
-              user_id: myCart.user_id
+            const myOrder = await api.get(`/get/order/${newOrderId}`).then(res => res.data[0]);
+            await api.put(`/update/order/${newOrderId}`, {
+              client_id: myOrder.client_id,
+              created_at: formatOrderDate(new Date(myOrder.created_at)),
+              updated_at: formatOrderDate(new Date()),
+              total_value: (myOrder.total_value + productToAdd.price).toFixed(2),
             });
-          } catch(err) {
+          } catch (err) {
             console.log(err);
           }
         }
-      }else {
-        try{
-          await api.post("/create/cart_product", {
-            shopping_cart_id: newCartId,
+      } else {
+        try {
+          await api.post("/create/order_product", {
+            order_id: newOrderId,
             product_id: Number(currentSelectedProduct),
             quantity: 1,
-            created_at: formatCartDate(new Date()),
-            total_value: productToAdd.price.toFixed(2),
-            product_value: productToAdd.price.toFixed(2)
+            unit_price: productToAdd.price.toFixed(2)
           });
-          const myCart = await api.get(`/get/shopping_cart/${newCartId}`).then(res => res.data[0]);
-          await api.put(`/update/shopping_cart/${newCartId}`, {
-            total_value: (myCart.total_value+productToAdd.price).toFixed(2),
-            status: "P",
-            created_at: formatCartDate(new Date(myCart.created_at)),
-            updated_at: formatCartDate(new Date()),
-            user_id: myCart.user_id
+          const myOrder = await api.get(`/get/order/${newOrderId}`).then(res => res.data[0]);
+          await api.put(`/update/order/${newOrderId}`, {
+            client_id: myOrder.client_id,
+            created_at: formatOrderDate(new Date(myOrder.created_at)),
+            updated_at: formatOrderDate(new Date()),
+            total_value: (myOrder.total_value + productToAdd.price).toFixed(2),
           });
-        } catch(err) {
+        } catch (err) {
           console.log(err);
         }
       }
@@ -135,56 +128,53 @@ export default function NewCart() {
     setProductAdded(true);
   }
 
-  const handleCreateNewCart = async () => {
+  const handleCreateNewOrder = async () => {
     try {
-      await api.post("/create/shopping_cart", {
+      await api.post("/create/order", {
+        client_id: Number(window.sessionStorage.getItem("clientId")),
+        created_at: formatOrderDate(new Date()),
+        updated_at: formatOrderDate(new Date()),
         total_value: 0,
-        status: "P",
-        user_id: Number(window.sessionStorage.getItem("userId")),
-        created_at: formatCartDate(new Date()),
-        updated_at: formatCartDate(new Date())
       })
-        .then(res => setNewCartId(res.data.insertId));
+        .then(res => setNewOrderId(res.data.insertId));
     } catch (err) {
       console.log(err);
     }
   }
 
-  const handleRemoveProductFromCart = async (toRemoveProductId: string) => {
+  const handleRemoveProductFromOrder = async (toRemoveProductId: number) => {
     setProductAdded(false);
-    const existingProductIndex = cartProducts.findIndex(cartProduct => cartProduct.product_id === toRemoveProductId);
-    const toRemoveCartProduct = cartProducts[existingProductIndex];
-    const myCart = await api.get(`/get/shopping_cart/${newCartId}`).then(res => res.data[0]);
+    const existingProductIndex = orderProducts.findIndex(orderProduct => orderProduct.product_id === toRemoveProductId);
+    const toRemoveOrderProduct = orderProducts[existingProductIndex];
+    const myOrder = await api.get(`/get/order/${newOrderId}`).then(res => res.data[0]);
 
-    if (toRemoveCartProduct.quantity > 1) {
-      try{
-        await api.put(`/update/cart_product/${newCartId}/${toRemoveCartProduct.product_id}`, {
-          quantity: toRemoveCartProduct.quantity-1,
-          created_at: formatCartDate(new Date(toRemoveCartProduct.created_at)),
-          total_value: (toRemoveCartProduct.total_value-toRemoveCartProduct.product_value),
-          product_value: toRemoveCartProduct.product_value
+    if (toRemoveOrderProduct.quantity > 1) {
+      try {
+        await api.put(`/update/order_product/${newOrderId}/${toRemoveOrderProduct.product_id}`, {
+          order_id: newOrderId,
+          product_id: Number(currentSelectedProduct),
+          quantity: (toRemoveOrderProduct.quantity - 1),
+          unit_price: toRemoveOrderProduct.unit_price.toFixed(2)
         });
-        await api.put(`/update/shopping_cart/${newCartId}`, {
-          total_value: (myCart.total_value-toRemoveCartProduct.product_value).toFixed(2),
-          status: "P",
-          created_at: formatCartDate(new Date(myCart.created_at)),
-          updated_at: formatCartDate(new Date()),
-          user_id: myCart.user_id
+        await api.put(`/update/order/${newOrderId}`, {
+          client_id: myOrder.client_id,
+          created_at: formatOrderDate(new Date(myOrder.created_at)),
+          updated_at: formatOrderDate(new Date()),
+          total_value: (myOrder.total_value - toRemoveOrderProduct.unit_price).toFixed(2),
         });
-      } catch(err) {
+      } catch (err) {
         console.log(err);
       }
     } else {
-      try{
-        await api.delete(`/delete/cart_product/${newCartId}/${toRemoveCartProduct.product_id}`);
-        await api.put(`/update/shopping_cart/${newCartId}`, {
-          total_value: (myCart.total_value-toRemoveCartProduct.product_value).toFixed(2),
-          status: "P",
-          created_at: formatCartDate(new Date(myCart.created_at)),
-          updated_at: formatCartDate(new Date()),
-          user_id: myCart.user_id
+      try {
+        await api.delete(`/delete/order_product/${newOrderId}/${toRemoveOrderProduct.product_id}`);
+        await api.put(`/update/order/${newOrderId}`, {
+          client_id: myOrder.client_id,
+          created_at: formatOrderDate(new Date(myOrder.created_at)),
+          updated_at: formatOrderDate(new Date()),
+          total_value: (myOrder.total_value - toRemoveOrderProduct.unit_price).toFixed(2),
         });
-      } catch(err) {
+      } catch (err) {
         console.log(err);
       }
     }
@@ -192,13 +182,13 @@ export default function NewCart() {
   }
 
   const handleCancelAndGoBack = async () => {
-    if(cartProducts.length > 0) {
-      cartProducts.forEach(async cartProduct => {
-        await api.delete(`/delete/cart_product/${newCartId}/${cartProduct.product_id}`);
+    if (orderProducts.length > 0) {
+      orderProducts.forEach(async orderProduct => {
+        await api.delete(`/delete/order_product/${newOrderId}/${orderProduct.product_id}`);
       });
     }
 
-    await api.delete(`/delete/shopping_cart/${newCartId}`);
+    await api.delete(`/delete/order/${newOrderId}`);
     router.back();
   }
 
@@ -206,26 +196,26 @@ export default function NewCart() {
     <ResponsiveLayout className={styles.main}>
       <Stack space={0}>
         <Inline space={16} alignItems="center">
-          <IconShoppingCartRegular size={40} /> 
+          <IconShoppingCartRegular size={40} />
           <Text8 color="white">Novo pedido</Text8>
         </Inline>
         <Box paddingTop={8}>
           <Text4 medium>Siga os passos abaixo para criar um carrinho e adicionar produtos</Text4>
         </Box>
         <Box paddingTop={64}>
-          <Stepper 
+          <Stepper
             currentIndex={stepperIndex}
             steps={["Criar carrinho", "Adicionar produtos"]}
           />
         </Box>
-        {isCreatingNewCart 
+        {isCreatingNewOrder
           ?
           <Box paddingTop={64}>
             <ButtonLayout>
               <ButtonPrimary onPress={() => {
-                handleCreateNewCart();
+                handleCreateNewOrder();
                 setStepperIndex(1);
-                setIsCreatingNewCart(false);
+                setIsCreatingNewOrder(false);
               }}>
                 Criar
               </ButtonPrimary>
@@ -237,7 +227,7 @@ export default function NewCart() {
               <Inline alignItems="center" space={16}>
                 <Select
                   fullWidth
-                  name="cart-product-addition"
+                  name="order-product-addition"
                   label="Escolha um..."
                   options={availableProducts.map(product => {
                     return {
@@ -247,24 +237,24 @@ export default function NewCart() {
                   })}
                   onChangeValue={(e) => setCurrentSelectedProduct(e)}
                 />
-                <ButtonPrimary onPress={() => {handleAddProductToCart()}}>
+                <ButtonPrimary onPress={() => { handleAddProductToOrder() }}>
                   Adicionar produto
                 </ButtonPrimary>
               </Inline>
             </Box>
             <Box paddingTop={32}>
-              {cartProducts.length > 0
+              {orderProducts.length > 0
                 &&
                 <>
                   <Tag type="success">
                     Produtos
                   </Tag>
                   <RowList>
-                    {cartProducts.map((cartProduct, index) => {
-                      const id = cartProduct.product_id;
+                    {orderProducts.map((orderProduct, index) => {
+                      const id = orderProduct.product_id;
                       const product = availableProducts.find(availableProduct => id == availableProduct.id);
-                      if(product){
-                        return(
+                      if (product) {
+                        return (
                           <Row
                             key={index}
                             extra={
@@ -272,9 +262,9 @@ export default function NewCart() {
                                 <Stack space={0}>
                                   <Text3 medium>{product.name}</Text3>
                                   <Text3 medium color="#8F97AF">{product.description}</Text3>
-                                  <Text3 medium color="#8F97AF">Quantidade: {cartProduct.quantity}</Text3>
+                                  <Text3 medium color="#8F97AF">Quantidade: {orderProduct.quantity}</Text3>
                                 </Stack>
-                                <ButtonDanger onPress={() => { handleRemoveProductFromCart(cartProduct.product_id) }}>
+                                <ButtonDanger onPress={() => { handleRemoveProductFromOrder(orderProduct.order_id) }}>
                                   Remover
                                 </ButtonDanger>
                               </Inline>
@@ -286,11 +276,11 @@ export default function NewCart() {
                   </RowList>
                 </>
               }
-              {cartProducts.length > 0
+              {orderProducts.length > 0
                 &&
                 <Box paddingTop={24}>
                   <Tag Icon={IconCoinsRegular} type="success">
-                    {`Valor total: R$${finalCartValue.toFixed(2).toString().replace(".", ",")}`}
+                    {`Valor total: R$${finalOrderValue.toFixed(2).toString().replace(".", ",")}`}
                   </Tag>
                 </Box>
               }
@@ -300,7 +290,7 @@ export default function NewCart() {
                 <ButtonSecondary onPress={() => { handleCancelAndGoBack() }}>
                   Cancelar
                 </ButtonSecondary>
-                <ButtonPrimary disabled={cartProducts.length == 0} onPress={() => { router.replace("/home") }}>
+                <ButtonPrimary disabled={orderProducts.length == 0} onPress={() => { router.replace("/home") }}>
                   Criar carrinho
                 </ButtonPrimary>
               </Inline>

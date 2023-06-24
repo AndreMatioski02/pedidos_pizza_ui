@@ -27,7 +27,7 @@ import styles from "./Home.module.css";
 import { useRouter } from "next/router";
 import { CartType, CartProductType, ProductType } from "@/types/cart";
 import { api } from "@/services/base";
-import { formatCartDate } from "@/utilities/formatCartDate";
+import { formatCartDate } from "@/utilities/formatOrderDate";
 
 export default function Home() {
   const [myCarts, setMyCarts] = React.useState<CartType[]>([]);

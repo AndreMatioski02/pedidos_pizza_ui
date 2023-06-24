@@ -1,4 +1,4 @@
-export const formatCartDate = (date: Date) => {
+export const formatOrderDate = (date: Date) => {
     return date.getUTCFullYear() + '-' +
         ('00' + (date.getUTCMonth() + 1)).slice(-2) + '-' +
         ('00' + date.getUTCDate()).slice(-2) + ' ' +
