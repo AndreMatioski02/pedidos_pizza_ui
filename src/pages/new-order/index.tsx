@@ -42,8 +42,8 @@ export default function NewOrder() {
   }, []);
 
   React.useEffect(() => {
+    handleFetchOrderProducts();
     if (newOrderId) {
-      handleFetchOrderProducts();
       handleFetchFinalOrderPrice();
     }
   }, [productAdded]);
@@ -53,7 +53,12 @@ export default function NewOrder() {
   }
 
   const handleFetchOrderProducts = async () => {
-    await api.get(`/get/order_product/${newOrderId}`).then(res => setOrderProducts(res.data));
+    try {
+      await api.get(`/get/order_product/${newOrderId}`).then(res => setOrderProducts(res.data));
+    } catch (err) {
+      setOrderProducts([]);
+      console.log(err);
+    }
   }
 
   const handleFetchFinalOrderPrice = async () => {
@@ -264,7 +269,7 @@ export default function NewOrder() {
                                   <Text3 medium color="#8F97AF">{product.description}</Text3>
                                   <Text3 medium color="#8F97AF">Quantidade: {orderProduct.quantity}</Text3>
                                 </Stack>
-                                <ButtonDanger onPress={() => { handleRemoveProductFromOrder(orderProduct.order_id) }}>
+                                <ButtonDanger onPress={() => { handleRemoveProductFromOrder(orderProduct.product_id) }}>
                                   Remover
                                 </ButtonDanger>
                               </Inline>
