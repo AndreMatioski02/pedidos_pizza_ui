@@ -78,15 +78,24 @@ export default function Home() {
   }
 
   const handleRemoveItemProductFromOrder = async (toRemoveProductId: number, orderId: number) => {
-    const myOrder = await api.get(`/get/order_product/${orderId}`).then(res => res.data[0]);
+    const myOrder = await api.get(`/get/order/${orderId}`).then(res => res.data[0]);
+    const toRemoveOrderProduct = await api.get(`/get/order_product/${orderId}/${toRemoveProductId}`).then(res => res.data[0]);
+
+    
     try {
-      // await api.delete(`/delete/order_product/${orderId}/${toRemoveProductId}`);
-      await api.put(`/update/order_product/${orderId}/${toRemoveProductId}`, {
-        order_id: myOrder.order_id,
-        product_id: myOrder.product_id,
-        quantity: (myOrder.quantity - 1),
-        unit_price: myOrder.unit_price.toFixed(2)
+      await api.delete(`/delete/order_product/${orderId}/${toRemoveProductId}`);
+      await api.put(`/update/order/${orderId}`, {
+        client_id: myOrder.client_id,
+        created_at: formatOrderDate(new Date()),
+        updated_at: formatOrderDate(new Date()),
+        total_value: (myOrder.total_value-(toRemoveOrderProduct.unit_price*toRemoveOrderProduct.quantity)),
       });
+      try {
+        await api.get(`/get/order_product/${orderId}`).then(res => res.data);
+      } catch (err) {
+        handleDeleteOrder(orderId);
+        console.log(err);
+      }
     } catch (err) {
       console.log(err);
     }
