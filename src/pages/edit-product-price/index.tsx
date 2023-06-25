@@ -54,7 +54,7 @@ export default function EditProductPrice() {
       });
       alert({
         title: "Preço atualizado com sucesso!",
-        message: "O preço do produto para este carrinho foi atualizado e já pode ser visualizado",
+        message: "O preço do produto para este pedido foi atualizado e já pode ser visualizado",
         acceptText: "Ok, continuar",
         onAccept () { router.replace("/home") }
       })
@@ -73,7 +73,7 @@ export default function EditProductPrice() {
         <Box paddingTop={8}>
           <Stack space={4}>
             <Text4 medium>Utilize o campo abaixo para alterar o preço de compra do produto selecionado</Text4>
-            <Text3 medium color="#888888">O preço será alterado apenas para este carrinho</Text3>
+            <Text3 medium color="#888888">O preço será alterado apenas para este pedido</Text3>
           </Stack>
         </Box>
         <Box paddingTop={64}>

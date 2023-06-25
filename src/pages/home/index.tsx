@@ -211,7 +211,7 @@ export default function Home() {
                           onAccept: () => { handleDeleteOrder(order.id) }
                         })}
                       >
-                        Excluir carrinho
+                        Excluir pedido
                       </ButtonDanger>
                     </Inline>
                   </Inline>

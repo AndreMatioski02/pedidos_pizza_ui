@@ -138,7 +138,7 @@ export default function AddProductToOrder() {
       <Stack space={0}>
        <Text8>Adicionar produto</Text8>
        <Box paddingTop={8}>
-        <Text4 medium>Por favor, escolha um produto da lista abaixo para adicionar ao carrinho</Text4>
+        <Text4 medium>Por favor, escolha um produto da lista abaixo para adicionar ao pedido</Text4>
        </Box>
        <Box paddingTop={64}>
         <Select 

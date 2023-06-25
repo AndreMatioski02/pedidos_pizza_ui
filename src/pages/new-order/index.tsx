@@ -205,12 +205,12 @@ export default function NewOrder() {
           <Text8 color="white">Novo pedido</Text8>
         </Inline>
         <Box paddingTop={8}>
-          <Text4 medium>Siga os passos abaixo para criar um carrinho e adicionar produtos</Text4>
+          <Text4 medium>Siga os passos abaixo para criar um novo pedido e adicionar produtos</Text4>
         </Box>
         <Box paddingTop={64}>
           <Stepper
             currentIndex={stepperIndex}
-            steps={["Criar carrinho", "Adicionar produtos"]}
+            steps={["Criar pedido", "Adicionar produtos"]}
           />
         </Box>
         {isCreatingNewOrder
@@ -296,7 +296,7 @@ export default function NewOrder() {
                   Cancelar
                 </ButtonSecondary>
                 <ButtonPrimary disabled={orderProducts.length == 0} onPress={() => { router.replace("/home") }}>
-                  Criar carrinho
+                  Criar pedido
                 </ButtonPrimary>
               </Inline>
             </Box>
