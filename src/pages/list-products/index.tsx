@@ -19,7 +19,7 @@ import {
 } from '@telefonica/mistica'
 import styles from "./ListProducts.module.css";
 import { useRouter } from "next/router";
-import { ProductType } from "@/types/cart";
+import { ProductType } from "@/types/types";
 import { api } from "@/services/base";
 
 export default function ListProducts() {
@@ -38,7 +38,7 @@ export default function ListProducts() {
     }
   }
 
-  const handleDeleteProduct = async (productId: string) => {
+  const handleDeleteProduct = async (productId: number) => {
     try {
       await api.delete(`/delete/product/${productId}`);
       handleGetProducts();
